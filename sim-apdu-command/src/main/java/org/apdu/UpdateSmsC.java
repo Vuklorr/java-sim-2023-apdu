@@ -11,42 +11,43 @@ public class UpdateSmsC {
             TerminalFactory terminalFactory = TerminalFactory.getDefault();
             List<CardTerminal> terminals = terminalFactory.terminals().list();
             CardTerminal terminal = terminals.get(0); // Первый доступный картридер
-            Card card = terminal.connect("T=0"); //FIXME добавь инфы, но по 3gpp 11.1 именно по этому протоколу передается
+
+            // Протокол T=0 является быйтовым, т.е. наименьшая единица данных, которая передается или обрабатывается, - это байт
+            // Протокол T=1 является блочно-ориентированным, т.е. наименьшая единица данных, которая передается или обрабатывается,
+            // - это блок, состоящий из последовательности байтов.
+            Card card = terminal.connect("T=0");
             CardChannel channel = card.getBasicChannel();
 
-            /*Stream.of(SELECT_MF_APDU, SELECT_DF_TELECOM_APDU, SELECT_EF_SMS_111_APDU)
-                    .map(ApduCommand::getValue)
-                    .map(CommandAPDU::new)
-*/
-            // Отправляем команду на карту и получаем ответ
-            // Переход к MF
+            // Отправляем команды на карту и получаем ответ
+            System.out.print("Переход к MF. ");
             ResponseAPDU response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_MF_APDU.getValue()));
 
             if(hasErrResponse(response)) {
                 return;
             }
 
-            // Переход DF telecome
+            System.out.print("Переход к DF telecome. ");
             response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_DF_TELECOM_APDU.getValue()));
 
             if(hasErrResponse(response)) {
                 return;
             }
 
-            // Переход к EF SMS 111
+            System.out.print("Переход к EF sms 111. ");
             response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_EF_SMS_111_APDU.getValue()));
 
             if(hasErrResponse(response)) {
                 return;
             }
 
-            //Вывод номера SMS центра
+            System.out.print("Вывод номера SMS центра. ");
             response = channel.transmit(new CommandAPDU(ApduCommand.READ_BINARY_SMS_C_APDU.getValue()));
+
             if (hasErrReadSmsC(response)) {
                 return;
             }
 
-            // Обновление номера SMS центра
+            System.out.print("Обновление номера SMS центра. ");
             response = channel.transmit(new CommandAPDU(ApduCommand.UPDATE_BINARY_SMS_C_APDU.getValue()));
 
             if (response.getSW() == 0x9000) {
@@ -56,8 +57,9 @@ public class UpdateSmsC {
                 return;
             }
 
-            //Вывод номера SMS центра
+            System.out.print("Вывод номера SMS центра. ");
             response = channel.transmit(new CommandAPDU(ApduCommand.READ_BINARY_SMS_C_APDU.getValue()));
+
             if (hasErrReadSmsC(response)) {
                 return;
             }
@@ -84,7 +86,7 @@ public class UpdateSmsC {
             // Получаем данные ответа
             byte[] responseData = response.getData();
             // Конвертируем данные из формата BCD в строку
-            String smsCenterNumber = bcdToString(responseData);
+            String smsCenterNumber = byteToHexString(responseData);
             System.out.println("Текущий номер SMS-центра: " + smsCenterNumber);
             return false;
         } else {
@@ -95,7 +97,7 @@ public class UpdateSmsC {
     }
 
     // Метод для преобразования данных из формата BCD в строку
-    private static String bcdToString(byte[] bcdData) {
+    private static String byteToHexString(byte[] bcdData) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bcdData) {
             sb.append(String.format("%02X", b));

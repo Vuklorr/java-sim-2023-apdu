@@ -44,10 +44,15 @@ public class DefaultSimEmulatorImpl implements DefaultSimEmulator {
         // в данном случае рассматривается всего 3 команды select, read binary и update binary
         switch (ins) {
             case (byte) 0xA4 -> {
-                mySim.setIdCurrentDir(apdu[5]);
+                //Предполагается, что команда всегда выполнится успешно
                 return ApduResponse.RESPONSE_SELECT_SUCCESS.getValue();
             }
             case (byte) 0xB0 -> {
+//                byte param1 = apdu[2];
+//                byte param2 = apdu[3];
+//                byte param3 = apdu[4];
+
+//                responseData = offsetData(param1, param2, param3, mySim.getSmsCenterNumberBCD());
                 responseData = mySim.getSmsCenterNumberBCD();
                 return ApduResponse.RESPONSE_SUCCESS.getValue();
             }
@@ -61,4 +66,15 @@ public class DefaultSimEmulatorImpl implements DefaultSimEmulator {
         }
         return ApduResponse.RESPONSE_INS_ERROR.getValue();
     }
+
+//    private byte[] offsetData(byte param1, byte param2, byte param3, byte[] data) {
+//        byte[] res = new byte[param3];
+//        int j = 0;
+//        for(int i = param1; i < param2 && i < param3; i++) {
+//            res[j++] = data[i];
+//            byte i1 = (byte) (data[i] >> 2);
+//        }
+//
+//        return res;
+//    }
 }

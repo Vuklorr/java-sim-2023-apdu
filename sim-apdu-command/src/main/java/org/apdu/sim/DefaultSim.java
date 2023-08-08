@@ -10,8 +10,6 @@ import lombok.Data;
 @Data
 public class DefaultSim {
 
-    private byte idCurrentDir;
-
     /**
      * Номер хранится в формате Packed BCD (binary coded decimal):
      * каждый десятичный разряд числа записывается в виде его четырёхбитного двоичного кода

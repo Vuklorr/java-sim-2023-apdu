@@ -57,7 +57,7 @@ public class UpdateSmsCenterNumber {
             }
 
             log.info("Обновление номера SMS центра. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.UPDATE_BINARY_SMS_C_APDU.getValue()));
+            response = channel.transmit(new CommandAPDU(ApduCommand.UPDATE_BINARY_SMS_CENTER_APDU.getValue()));
 
             if (response.getSW() == 0x9000) {
                 log.info("Результат: " + Integer.toHexString(response.getSW()));

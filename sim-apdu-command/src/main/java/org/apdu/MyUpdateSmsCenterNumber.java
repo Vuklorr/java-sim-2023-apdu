@@ -48,7 +48,7 @@ public class MyUpdateSmsCenterNumber {
         }
 
         log.info("Обновление номера SMS центра. ");
-        responseApdu = simEmulator.execute(ApduCommand.UPDATE_BINARY_SMS_C_APDU.getValue());
+        responseApdu = simEmulator.execute(ApduCommand.UPDATE_BINARY_SMS_CENTER_APDU.getValue());
 
         if (responseApdu[0] == (byte)0x90 && responseApdu[1] == (byte)0x00) {
             log.info("Результат: " + SimUtils.byteToHexString(responseApdu));

@@ -158,18 +158,23 @@ public class SimUtils {
      * @return - массив байтов с учетом смещения
      */
     public static byte[] offsetUpdateData(byte param1, byte param2, byte param3, byte[] apduData, byte[] simData) {
-        int i = 0;
-        while (i < simData.length) {
-            if(i == param1) {
-                int j = 0;
+        int i = param1;
+        int j = 0;
 
-                while (i >= param1 && i < simData.length - param2 && j < param3) {
-                    simData[i++] = apduData[j++];
-                }
-            } else {
-                i++;
-            }
+        simData[0] = (byte) apduData.length;
+
+        if(param1 == (byte)0x00) {
+            i++;
         }
+
+        while (i < simData.length - param2 && j < param3) {
+            simData[i++] = apduData[j++];
+        }
+
+        while (i < simData.length) {
+            simData[i++] = (byte) 0xFF;
+        }
+
 
         return simData;
     }

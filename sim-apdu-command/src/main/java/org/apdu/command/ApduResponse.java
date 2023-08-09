@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 public enum ApduResponse {
     RESPONSE_SUCCESS (new byte[]{(byte)0x90, (byte)0x00 }),
 
-    //второй байт должен выводить длину значения ответа, но в данной реализации он выводит одно и то же значение,
+    //второй байт должен выводить длину значений в файле, но в данной реализации он выводит одно и то же значение,
     // так как оно не участвует в задании.
-    RESPONSE_SELECT_SUCCESS (new byte[] {(byte)0x9F, (byte)0x06}),
+    RESPONSE_SELECT_SUCCESS (new byte[] {(byte)0x9F, (byte)0x09}),
 
     RESPONSE_CLA_ERROR (new byte[]{(byte)0x6E, (byte)0x00}),
 

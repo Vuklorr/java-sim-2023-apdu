@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.apdu.command.ApduResponse;
 import org.apdu.emulator.DefaultSimEmulator;
 import org.apdu.sim.DefaultSim;
+import org.apdu.utils.SimUtils;
 
 /**
  * Простой сим эмулятор, который больше похож на mock:
@@ -34,6 +35,9 @@ public class DefaultSimEmulatorImpl implements DefaultSimEmulator {
 
         byte cla = apdu[0];
         byte ins = apdu[1];
+        byte param1 = apdu[2];
+        byte param2 = apdu[3];
+        byte param3 = apdu[4];
 
         // в данном случае рассматривается только класс GSM
         // GSM - глобальный стандарт цифровой мобильной сотовой связи с разделением каналов по времени и частоте.
@@ -44,37 +48,34 @@ public class DefaultSimEmulatorImpl implements DefaultSimEmulator {
         // в данном случае рассматривается всего 3 команды select, read binary и update binary
         switch (ins) {
             case (byte) 0xA4 -> {
-                //Предполагается, что команда всегда выполнится успешно
-                return ApduResponse.RESPONSE_SELECT_SUCCESS.getValue();
+                return param1 == (byte) 0x00 && param2 == (byte) 0x00
+                        ? ApduResponse.RESPONSE_SELECT_SUCCESS.getValue()
+                        : ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
             }
             case (byte) 0xB0 -> {
-//                byte param1 = apdu[2];
-//                byte param2 = apdu[3];
-//                byte param3 = apdu[4];
+                final int MAX_DATA_LEN = mySim.getSmsCenterNumberBCD().length;
+                if(MAX_DATA_LEN < (param1 + param2 + param3)) {
+                    return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                }
 
-//                responseData = offsetData(param1, param2, param3, mySim.getSmsCenterNumberBCD());
-                responseData = mySim.getSmsCenterNumberBCD();
+                responseData = SimUtils.offsetReadData(param1, param2, param3, mySim.getSmsCenterNumberBCD());
                 return ApduResponse.RESPONSE_SUCCESS.getValue();
             }
             case (byte) 0xD6 -> {
-                byte[] data = new byte[apdu[4]];
-                System.arraycopy(apdu, 5, data, 0, apdu.length - 5);
-                mySim.setSmsCenterNumberBCD(data);
+                final int MAX_DATA_LEN = mySim.getSmsCenterNumberBCD().length;
+                if(MAX_DATA_LEN < (param1 + param2 + param3)) {
+                    return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                }
+
+                byte[] apduData = new byte[apdu[4]];
+                System.arraycopy(apdu, 5, apduData, 0, apdu.length - 5);
+
+                responseData = SimUtils.offsetUpdateData(param1, param2, param3, apduData, mySim.getSmsCenterNumberBCD());
+                mySim.setSmsCenterNumberBCD(responseData);
 
                 return ApduResponse.RESPONSE_SUCCESS.getValue();
             }
         }
         return ApduResponse.RESPONSE_INS_ERROR.getValue();
     }
-
-//    private byte[] offsetData(byte param1, byte param2, byte param3, byte[] data) {
-//        byte[] res = new byte[param3];
-//        int j = 0;
-//        for(int i = param1; i < param2 && i < param3; i++) {
-//            res[j++] = data[i];
-//            byte i1 = (byte) (data[i] >> 2);
-//        }
-//
-//        return res;
-//    }
 }

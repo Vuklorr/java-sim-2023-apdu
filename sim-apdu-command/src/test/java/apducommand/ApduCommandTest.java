@@ -68,6 +68,52 @@ public class ApduCommandTest {
     }
 
     @Test
+    public void shouldReturnErrorOnIncorrectParamForSelect() {
+        final byte[] SMS_CENTER_NUMBER = new byte[]{(byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0};
+        final DefaultSim SIM = new DefaultSim(SMS_CENTER_NUMBER);
+
+        final byte[] INCORRECT_SELECT_PARAM = new byte[]{(byte)0xA0, (byte)0xA4, (byte)0x01, (byte)0x02, (byte)0x02,
+                (byte)0x3F, (byte)0x00};
+        final DefaultSimEmulator SIM_EMULATOR = new DefaultSimEmulatorImpl(SIM);
+
+        byte[] result = SIM_EMULATOR.execute(INCORRECT_SELECT_PARAM);
+
+        assertArrayEquals(result, ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue());
+        assertArrayEquals(SMS_CENTER_NUMBER, SIM.getSmsCenterNumberBCD());
+    }
+
+    @Test
+    public void shouldReturnErrorOnIncorrectParamForReadBinary() {
+        final byte[] SMS_CENTER_NUMBER = new byte[]{(byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0};
+
+        final DefaultSim SIM = new DefaultSim(SMS_CENTER_NUMBER);
+        final DefaultSimEmulator SIM_EMULATOR = new DefaultSimEmulatorImpl(SIM);
+
+        final byte[] INCORRECT_READ_BINARY_PARAM = new byte[]{(byte)0xA0, (byte)0xB0, (byte)0x03, (byte)0x02, (byte)0x06};
+
+        byte[] result = SIM_EMULATOR.execute(INCORRECT_READ_BINARY_PARAM);
+
+        assertArrayEquals(result, ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue());
+        assertArrayEquals(SMS_CENTER_NUMBER, SIM.getSmsCenterNumberBCD());
+    }
+
+    @Test
+    public void shouldReturnErrorOnIncorrectParamForUpdateBinary() {
+        final byte[] SMS_CENTER_NUMBER = new byte[]{(byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0};
+        final byte[] NEW_SMS_CENTER_NUMBER = new byte[]{(byte)0x97, (byte)0x02, (byte)0x31, (byte)0x23, (byte)0x32, (byte)0xF6};
+        final DefaultSim SIM = new DefaultSim(SMS_CENTER_NUMBER);
+        final DefaultSimEmulator SIM_EMULATOR = new DefaultSimEmulatorImpl(SIM);
+
+        final byte[] INCORRECT_UPDATE_BINARY_PARAM = new byte[]{(byte)0xA0, (byte)0xD6, (byte)0x02, (byte)0x03, (byte)0x06,
+                (byte)0x97, (byte)0x02, (byte)0x31, (byte)0x23, (byte)0x32, (byte)0xF6};
+
+        byte[] result = SIM_EMULATOR.execute(INCORRECT_UPDATE_BINARY_PARAM);
+
+        assertArrayEquals(result, ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue());
+        assertArrayEquals(SMS_CENTER_NUMBER, SIM.getSmsCenterNumberBCD());
+    }
+
+    @Test
     public void shouldReturnSuccessesOnSelectMFCommand() {
         final byte[] SMS_CENTER_NUMBER = new byte[]{(byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0};
         final DefaultSim SIM = new DefaultSim(SMS_CENTER_NUMBER);
@@ -106,13 +152,34 @@ public class ApduCommandTest {
     @Test
     public void shouldReturnSuccessesOnReadBinaryCommand() {
         final byte[] SMS_CENTER_NUMBER = new byte[]{(byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0};
+
         final DefaultSim SIM = new DefaultSim(SMS_CENTER_NUMBER);
         final DefaultSimEmulator SIM_EMULATOR = new DefaultSimEmulatorImpl(SIM);
 
-        byte[] result = SIM_EMULATOR.execute(ApduCommand.READ_BINARY_SMS_C_APDU.getValue());
+        byte[] result = SIM_EMULATOR.execute(ApduCommand.READ_BINARY_SMS_CENTER_APDU.getValue());
 
         assertArrayEquals(result, ApduResponse.RESPONSE_SUCCESS.getValue());
-        assertArrayEquals(SMS_CENTER_NUMBER, SIM.getSmsCenterNumberBCD());
+        assertArrayEquals(SMS_CENTER_NUMBER, SIM_EMULATOR.getResponseData());
+    }
+
+    @Test
+    public void shouldReturnSuccessesOnReadBinaryWithParamCommand() {
+        // Первые 3 байта и последние 3 байта - это данные, которые нам не нужны.
+        // Номер SMS - центра находится между этими байтами и имеет размер 6 байт.
+        final byte[] DATA_WITH_SMS_CENTER_NUMBER = new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x05,
+                (byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0,
+                (byte) 0x00, (byte) 0x01, (byte) 0x05};
+        final byte[] READ_BINARY_SMS_CENTER_WITH_PARAM_APDU = new byte[]{(byte)0xA0, (byte)0xB0, (byte)0x03, (byte)0x03, (byte)0x06};
+
+
+        final byte[] SMS_CENTER_NUMBER = new byte[]{(byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0};
+        final DefaultSim SIM = new DefaultSim(DATA_WITH_SMS_CENTER_NUMBER);
+        final DefaultSimEmulator SIM_EMULATOR = new DefaultSimEmulatorImpl(SIM);
+
+        byte[] result = SIM_EMULATOR.execute(READ_BINARY_SMS_CENTER_WITH_PARAM_APDU);
+
+        assertArrayEquals(result, ApduResponse.RESPONSE_SUCCESS.getValue());
+        assertArrayEquals(SMS_CENTER_NUMBER, SIM_EMULATOR.getResponseData());
     }
 
     @Test
@@ -123,6 +190,26 @@ public class ApduCommandTest {
         final DefaultSimEmulator SIM_EMULATOR = new DefaultSimEmulatorImpl(SIM);
 
         byte[] result = SIM_EMULATOR.execute(ApduCommand.UPDATE_BINARY_SMS_CENTER_APDU.getValue());
+
+        assertArrayEquals(result, ApduResponse.RESPONSE_SUCCESS.getValue());
+        assertArrayEquals(NEW_SMS_CENTER_NUMBER, SIM.getSmsCenterNumberBCD());
+    }
+
+    @Test
+    public void shouldReturnSuccessesOnUpdateBinaryWithParamCommand() {
+        final byte[] SMS_CENTER_NUMBER = new byte[]{(byte) 0x00, (byte) 0x01,
+                (byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0,
+                (byte) 0x02};
+        final byte[] NEW_SMS_CENTER_NUMBER = new byte[]{(byte) 0x00, (byte) 0x01,
+                (byte)0x97, (byte)0x02, (byte)0x31, (byte)0x23, (byte)0x32, (byte)0xF6,
+                (byte) 0x02};
+        final byte[] UPDATE_BINARY_SMS_CENTER_WITH_PARAM_APDU = new byte[]{(byte)0xA0, (byte)0xD6, (byte)0x02, (byte)0x01, (byte)0x06,
+                (byte)0x97, (byte)0x02, (byte)0x31, (byte)0x23, (byte)0x32, (byte)0xF6};
+
+        final DefaultSim SIM = new DefaultSim(SMS_CENTER_NUMBER);
+        final DefaultSimEmulator SIM_EMULATOR = new DefaultSimEmulatorImpl(SIM);
+
+        byte[] result = SIM_EMULATOR.execute(UPDATE_BINARY_SMS_CENTER_WITH_PARAM_APDU);
 
         assertArrayEquals(result, ApduResponse.RESPONSE_SUCCESS.getValue());
         assertArrayEquals(NEW_SMS_CENTER_NUMBER, SIM.getSmsCenterNumberBCD());

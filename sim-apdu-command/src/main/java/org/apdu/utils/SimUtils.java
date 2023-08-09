@@ -100,6 +100,7 @@ public class SimUtils {
     /**
      * Метод, который преобразует номер SMC центра в удобный на пользователя формат.
      * Из 2143658790F0 в +12345678900
+     *
      * @param number - номер SMS центра в формате Packed BCD
      * @return - номер SMS центра в другом формате
      */
@@ -125,5 +126,51 @@ public class SimUtils {
         }
 
         return stringBuilder.toString();
+    }
+
+    /**
+     * Метод, который обрабатывает смещение параметра 1 и параметра 2 в APDU команде READ.
+     *
+     * @param param1 - первый параметр C-APDU (смещение старшего бита)
+     * @param param2 - второй параметр C-APDU (смещение младшего бита)
+     * @param param3 - третий параметр C-APDU (размер данных, которые команда должна вернуть)
+     * @param simData - данные SIM карты (номер SMS центра)
+     * @return - массив байтов с учетом смещения
+     */
+    public static byte[] offsetReadData(byte param1, byte param2, byte param3, byte[] simData) {
+        byte[] res = new byte[param3];
+        int j = 0;
+        for(int i = param1; i < simData.length - param2 && j < param3; i++) {
+            res[j++] = simData[i];
+        }
+
+        return res;
+    }
+
+    /**
+     * Метод, который обрабатывает смещение параметра 1 и параметра 2 в APDU команде UPDATE.
+     *
+     * @param param1 - первый параметр C-APDU (смещение старшего бита)
+     * @param param2 - второй параметр C-APDU (смещение младшего бита)
+     * @param param3 - третий параметр C-APDU (размер данных, которые команда передает)
+     * @param apduData - данные C-APDU
+     * @param simData - данные SIM карты (номер SMS центра)
+     * @return - массив байтов с учетом смещения
+     */
+    public static byte[] offsetUpdateData(byte param1, byte param2, byte param3, byte[] apduData, byte[] simData) {
+        int i = 0;
+        while (i < simData.length) {
+            if(i == param1) {
+                int j = 0;
+
+                while (i >= param1 && i < simData.length - param2 && j < param3) {
+                    simData[i++] = apduData[j++];
+                }
+            } else {
+                i++;
+            }
+        }
+
+        return simData;
     }
 }

@@ -41,7 +41,7 @@ public class MyUpdateSmsCenterNumber {
         }
 
         log.info("Вывод номера SMS центра. ");
-        responseApdu = simEmulator.execute(ApduCommand.READ_BINARY_SMS_C_APDU.getValue());
+        responseApdu = simEmulator.execute(ApduCommand.READ_BINARY_SMS_CENTER_APDU.getValue());
 
         if (SimUtils.hasErrReadSmsCenter(responseApdu, simEmulator.getResponseData())) {
             return;
@@ -58,7 +58,7 @@ public class MyUpdateSmsCenterNumber {
         }
 
         log.info("Вывод номера SMS центра. ");
-        responseApdu = simEmulator.execute(ApduCommand.READ_BINARY_SMS_C_APDU.getValue());
+        responseApdu = simEmulator.execute(ApduCommand.READ_BINARY_SMS_CENTER_APDU.getValue());
 
         //После этой проверки должны быть еще действия, поэтому эта проверка нужна
         if (SimUtils.hasErrReadSmsCenter(responseApdu, simEmulator.getResponseData())) {

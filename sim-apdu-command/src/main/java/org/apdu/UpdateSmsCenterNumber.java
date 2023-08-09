@@ -50,7 +50,7 @@ public class UpdateSmsCenterNumber {
             }
 
             log.info("Вывод номера SMS центра. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.READ_BINARY_SMS_C_APDU.getValue()));
+            response = channel.transmit(new CommandAPDU(ApduCommand.READ_BINARY_SMS_CENTER_APDU.getValue()));
 
             if (SimUtils.hasErrReadSmsCenter(response)) {
                 return;
@@ -67,7 +67,7 @@ public class UpdateSmsCenterNumber {
             }
 
             log.info("Вывод номера SMS центра. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.READ_BINARY_SMS_C_APDU.getValue()));
+            response = channel.transmit(new CommandAPDU(ApduCommand.READ_BINARY_SMS_CENTER_APDU.getValue()));
 
             if (SimUtils.hasErrReadSmsCenter(response)) {
                 return;

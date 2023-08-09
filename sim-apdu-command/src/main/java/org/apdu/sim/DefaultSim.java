@@ -1,5 +1,6 @@
 package org.apdu.sim;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  * smsCenterNumberBCD - номер смс центра.
  */
 @Data
+@AllArgsConstructor
 public class DefaultSim {
 
     /**
@@ -20,9 +22,4 @@ public class DefaultSim {
      * +1(234)567-89-00 -> 21 43 65 87 90 F0
      */
     private byte[] imsiDataBCD;
-
-    public DefaultSim(byte[] smsCenterNumberBCD) {
-        this.imsiDataBCD = smsCenterNumberBCD;
-    }
-
 }

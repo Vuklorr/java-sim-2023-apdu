@@ -2,8 +2,8 @@ package org.apdu;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apdu.command.ApduCommand;
-import org.apdu.emulator.DefaultSimEmulator;
-import org.apdu.emulator.impl.DefaultSimEmulatorImpl;
+import org.apdu.api.SimEmulator;
+import org.apdu.emulator.DefaultSimEmulatorImpl;
 import org.apdu.sim.DefaultSim;
 import org.apdu.utils.SimUtils;
 
@@ -16,7 +16,7 @@ public class MyUpdateSmsCenterNumber {
                 (byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0,
                 (byte) 0xFF, (byte) 0xFF};
         DefaultSim mySim = new DefaultSim(smsCenterNumber);
-        DefaultSimEmulator simEmulator = new DefaultSimEmulatorImpl(mySim);
+        SimEmulator simEmulator = new DefaultSimEmulatorImpl(mySim);
         //массив байтов, для получения R-APDU
         byte[] responseApdu;
 

@@ -1,32 +1,24 @@
-package org.apdu.emulator.impl;
+package org.apdu.emulator;
 
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apdu.command.ApduResponse;
-import org.apdu.emulator.DefaultSimEmulator;
+import org.apdu.api.SimEmulator;
 import org.apdu.sim.DefaultSim;
 import org.apdu.utils.SimUtils;
 
 /**
- * Простой сим эмулятор, который больше похож на mock:
- * отправляется запрос и возвращается ответ.
- * Нужен для эмуляции взаимодействия с SIM - картой
+ * Реализация интерфейса SimEmulator.
+ * Позволяет получить APDU команду, обработать и отправить ответ (R-APDU)
  */
 @RequiredArgsConstructor
-public class DefaultSimEmulatorImpl implements DefaultSimEmulator {
+public class DefaultSimEmulatorImpl implements SimEmulator {
     private final DefaultSim mySim;
 
     @Getter
     private byte[] responseData;
 
-
-    /**
-     * Метод для обработки APDU команд.
-     *
-     * @param apdu - apdu команда (C-APDU)
-     * @return - apdu ответ (R-APDU)
-     */
     @Override
     public byte[] execute(byte[] apdu) {
         if(apdu.length < 5 || apdu.length > 260) {

@@ -53,16 +53,16 @@ public class DefaultSimEmulatorImpl implements DefaultSimEmulator {
                         : ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
             }
             case (byte) 0xB0 -> {
-                final int MAX_DATA_LEN = mySim.getSmsCenterNumberBCD().length;
+                final int MAX_DATA_LEN = mySim.getImsiDataBCD().length;
                 if(MAX_DATA_LEN < (param1 + param2 + param3)) {
                     return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
                 }
 
-                responseData = SimUtils.offsetReadData(param1, param2, param3, mySim.getSmsCenterNumberBCD());
+                responseData = SimUtils.offsetReadData(param1, param2, param3, mySim.getImsiDataBCD());
                 return ApduResponse.RESPONSE_SUCCESS.getValue();
             }
             case (byte) 0xD6 -> {
-                final int MAX_DATA_LEN = mySim.getSmsCenterNumberBCD().length;
+                final int MAX_DATA_LEN = mySim.getImsiDataBCD().length;
                 if(MAX_DATA_LEN < (param1 + param2 + param3)) {
                     return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
                 }
@@ -70,8 +70,8 @@ public class DefaultSimEmulatorImpl implements DefaultSimEmulator {
                 byte[] apduData = new byte[apdu[4]];
                 System.arraycopy(apdu, 5, apduData, 0, apdu.length - 5);
 
-                responseData = SimUtils.offsetUpdateData(param1, param2, param3, apduData, mySim.getSmsCenterNumberBCD());
-                mySim.setSmsCenterNumberBCD(responseData);
+                responseData = SimUtils.offsetUpdateData(param1, param2, param3, apduData, mySim.getImsiDataBCD());
+                mySim.setImsiDataBCD(responseData);
 
                 return ApduResponse.RESPONSE_SUCCESS.getValue();
             }

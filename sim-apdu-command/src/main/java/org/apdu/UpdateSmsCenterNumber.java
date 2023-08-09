@@ -35,15 +35,15 @@ public class UpdateSmsCenterNumber {
                 return;
             }
 
-            log.info("Переход к DF telecom. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_DF_TELECOM_APDU.getValue()));
+            log.info("Переход к DF GSM. ");
+            response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_DF_GSM_APDU.getValue()));
 
             if(SimUtils.hasErrResponse(response)) {
                 return;
             }
 
-            log.info("Переход к EF sms 111. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_EF_SMS_111_APDU.getValue()));
+            log.info("Переход к EF IMSI. ");
+            response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_EF_IMSI_APDU.getValue()));
 
             if(SimUtils.hasErrResponse(response)) {
                 return;

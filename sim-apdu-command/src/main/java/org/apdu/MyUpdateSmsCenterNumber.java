@@ -12,7 +12,9 @@ public class MyUpdateSmsCenterNumber {
     public static void main(String[] args) {
         //Подключение к карт ридеру по протоколу T=0
         //Взаимодействие с SIM картой
-        byte[] smsCenterNumber = new byte[]{(byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0};
+        byte[] smsCenterNumber = new byte[]{(byte)0x06,
+                (byte) 0x21, (byte) 0x43, (byte) 0x65, (byte) 0x87, (byte) 0x09, (byte) 0xF0,
+                (byte) 0xFF, (byte) 0xFF};
         DefaultSim mySim = new DefaultSim(smsCenterNumber);
         DefaultSimEmulator simEmulator = new DefaultSimEmulatorImpl(mySim);
         //массив байтов, для получения R-APDU
@@ -26,15 +28,15 @@ public class MyUpdateSmsCenterNumber {
             return;
         }
 
-        log.info("Переход к DF telecom. ");
-        responseApdu = simEmulator.execute(ApduCommand.SELECT_DF_TELECOM_APDU.getValue());
+        log.info("Переход к DF GSM. ");
+        responseApdu = simEmulator.execute(ApduCommand.SELECT_DF_GSM_APDU.getValue());
 
         if(SimUtils.hasErrResponse(responseApdu)) {
             return;
         }
 
-        log.info("Переход к EF sms 111. ");
-        responseApdu = simEmulator.execute(ApduCommand.SELECT_EF_SMS_111_APDU.getValue());
+        log.info("Переход к EF IMSI. ");
+        responseApdu = simEmulator.execute(ApduCommand.SELECT_EF_IMSI_APDU.getValue());
 
         if(SimUtils.hasErrResponse(responseApdu)) {
             return;
@@ -49,7 +51,6 @@ public class MyUpdateSmsCenterNumber {
 
         log.info("Обновление номера SMS центра. ");
         responseApdu = simEmulator.execute(ApduCommand.UPDATE_BINARY_SMS_CENTER_APDU.getValue());
-
         if (responseApdu[0] == (byte)0x90 && responseApdu[1] == (byte)0x00) {
             log.info("Результат: " + SimUtils.byteToHexString(responseApdu));
         } else {

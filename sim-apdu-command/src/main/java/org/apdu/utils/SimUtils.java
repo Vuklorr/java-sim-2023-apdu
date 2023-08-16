@@ -1,11 +1,38 @@
 package org.apdu.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apdu.ef.DefaultEfImsi;
+import org.apdu.ef.DefaultEfSmsP;
 
 import javax.smartcardio.ResponseAPDU;
 
 @Slf4j(topic = "SimUtils")
 public class SimUtils {
+
+    /**
+     * Инициализация sim карты lfyysvb
+     * @return инициализированную sim smsp
+     */
+    public static DefaultEfSmsP initSimSMSP() {
+        byte parameterIndicator = (byte)0xE9;
+        byte[] destinationAddress = new byte[] {(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
+                (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
+                (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF};
+        byte[] serviceCentreAddress = new byte[] {(byte)0x07, (byte)0x91,
+                (byte)0x21, (byte)0x43, (byte)0x65, (byte)0x87, (byte)0x09, (byte)0xF0,
+                (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF};
+        byte protocolId = (byte)0x00;
+        byte dataCodingScheme =(byte)0x00;
+        byte validPeriod = (byte)0x00;
+        return new DefaultEfSmsP(parameterIndicator, destinationAddress, serviceCentreAddress,
+                protocolId, dataCodingScheme, validPeriod);
+    }
+
+    public static DefaultEfImsi initSimIMSI() {
+        byte[] imsiDataBCD = new byte[] {(byte)0x06, (byte)0x21, (byte)0x43, (byte)0x65, (byte)0x87, (byte)0x09, (byte)0xF0,
+                (byte)0xFF, (byte)0xFF};
+        return new DefaultEfImsi(imsiDataBCD);
+    }
 
     /**
      * Метод, который преобразует байты в hex.
@@ -109,10 +136,11 @@ public class SimUtils {
         String digits = number.replaceAll("\\D", "");
 
         // Форматирование номера
+        // Подразумевается, что номер всегда начинается с +
         StringBuilder stringBuilder = new StringBuilder("+");
 
-        int i = 0;
-        int j = 1;
+        int i = 4;
+        int j = 5;
         while (j < digits.length()) {
             stringBuilder.append(digits.charAt(j));
             stringBuilder.append(digits.charAt(i));
@@ -131,16 +159,16 @@ public class SimUtils {
     /**
      * Метод, который обрабатывает смещение параметра 1 и параметра 2 в APDU команде READ.
      *
-     * @param param1 - первый параметр C-APDU (смещение старшего бита)
-     * @param param2 - второй параметр C-APDU (смещение младшего бита)
+     * @param offset - смещение, с которого начинается считывание
      * @param param3 - третий параметр C-APDU (размер данных, которые команда должна вернуть)
      * @param simData - данные SIM карты (номер SMS центра)
      * @return - массив байтов с учетом смещения
      */
-    public static byte[] offsetReadData(byte param1, byte param2, byte param3, byte[] simData) {
+    //FIXME смещение задается 2 параметрами 01 и 04 = 0104h -> 260
+    public static byte[] offsetReadData(short offset, byte param3, byte[] simData) {
         byte[] res = new byte[param3];
         int j = 0;
-        for(int i = param1; i < simData.length - param2 && j < param3; i++) {
+        for(int i = offset; i < simData.length && j < param3; i++) {
             res[j++] = simData[i];
         }
 
@@ -150,24 +178,24 @@ public class SimUtils {
     /**
      * Метод, который обрабатывает смещение параметра 1 и параметра 2 в APDU команде UPDATE.
      *
-     * @param param1 - первый параметр C-APDU (смещение старшего бита)
-     * @param param2 - второй параметр C-APDU (смещение младшего бита)
+     * @param offset - смещение, с которого начинается считывание
      * @param param3 - третий параметр C-APDU (размер данных, которые команда передает)
      * @param apduData - данные C-APDU
      * @param simData - данные SIM карты (номер SMS центра)
      * @return - массив байтов с учетом смещения
      */
-    public static byte[] offsetUpdateData(byte param1, byte param2, byte param3, byte[] apduData, byte[] simData) {
-        int i = param1;
+    //FIXME смотри выше
+    public static byte[] offsetUpdateData(short offset, byte param3, byte[] apduData, byte[] simData) {
+        int i = offset;
         int j = 0;
 
         simData[0] = (byte) apduData.length;
 
-        if(param1 == (byte)0x00) {
+        if(offset == (byte)0x00) {
             i++;
         }
 
-        while (i < simData.length - param2 && j < param3) {
+        while (i < simData.length && j < param3) {
             simData[i++] = apduData[j++];
         }
 

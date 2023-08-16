@@ -1,5 +1,7 @@
 package org.apdu.api;
 
+import org.apdu.command.DefaultApduCommand;
+
 /**
  * Простой сим эмулятор, который больше похож на mock:
  * отправляется запрос и возвращается ответ.
@@ -14,7 +16,7 @@ public interface SimEmulator {
      * @param apdu - apdu команда (C-APDU)
      * @return - apdu ответ (R-APDU)
      */
-    byte[] execute(byte[] apdu);
+    byte[] execute(DefaultApduCommand apdu);
 
     /**
      * Метод, который возвращает данные ответа.

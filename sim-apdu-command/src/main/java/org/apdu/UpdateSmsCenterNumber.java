@@ -1,7 +1,6 @@
 package org.apdu;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apdu.command.ApduCommand;
 import org.apdu.utils.SimUtils;
 
 import javax.smartcardio.Card;
@@ -29,35 +28,46 @@ public class UpdateSmsCenterNumber {
 
             // Отправляем команды на карту и получаем ответ
             log.info("Переход к MF. ");
-            ResponseAPDU response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_MF_APDU.getValue()));
+            byte[] selectCommandApdu = new byte[] {(byte)0xA0, (byte)0xA4, (byte)0x00, (byte)0x00, (byte)0x02,
+                    (byte)0x3F, (byte)0x00};
+            ResponseAPDU response = channel.transmit(new CommandAPDU(selectCommandApdu));
 
             if(SimUtils.hasErrResponse(response)) {
                 return;
             }
 
-            log.info("Переход к DF GSM. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_DF_GSM_APDU.getValue()));
+            log.info("Переход к DF Telecom. ");
+            selectCommandApdu[5] = (byte)0x7F;
+            selectCommandApdu[6] = (byte)0x10;
+            response = channel.transmit(new CommandAPDU(selectCommandApdu));
 
             if(SimUtils.hasErrResponse(response)) {
                 return;
             }
 
-            log.info("Переход к EF IMSI. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.SELECT_EF_IMSI_APDU.getValue()));
+            log.info("Переход к EF SMSP. ");
+            selectCommandApdu[5] = (byte)0x6F;
+            selectCommandApdu[6] = (byte)0x42;
+            response = channel.transmit(new CommandAPDU(selectCommandApdu));
 
             if(SimUtils.hasErrResponse(response)) {
                 return;
             }
+
+            //нужна ли проверка на CHV1 для read и update зависит от sim
 
             log.info("Вывод номера SMS центра. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.READ_BINARY_SMS_CENTER_APDU.getValue()));
+            byte[] readCommandApdu = new byte[] {(byte)0xA0, (byte)0xB2, (byte)0x03, (byte)0x04, (byte) 0x06};
+            response = channel.transmit(new CommandAPDU(readCommandApdu));
 
             if (SimUtils.hasErrReadSmsCenter(response)) {
                 return;
             }
 
             log.info("Обновление номера SMS центра. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.UPDATE_BINARY_SMS_CENTER_APDU.getValue()));
+            byte[] updateCommandApdu = new byte[] {(byte)0xA0, (byte)0xDC, (byte)0x03, (byte)0x04, (byte) 0x08,
+                    (byte)0x07, (byte)0x91, (byte)0x97, (byte)0x02, (byte)0x31, (byte)0x23, (byte)0x32, (byte)0xF6};
+            response = channel.transmit(new CommandAPDU(updateCommandApdu));
 
             if (response.getSW() == 0x9000) {
                 log.info("Результат: " + Integer.toHexString(response.getSW()));
@@ -67,7 +77,7 @@ public class UpdateSmsCenterNumber {
             }
 
             log.info("Вывод номера SMS центра. ");
-            response = channel.transmit(new CommandAPDU(ApduCommand.READ_BINARY_SMS_CENTER_APDU.getValue()));
+            response = channel.transmit(new CommandAPDU(readCommandApdu));
 
             if (SimUtils.hasErrReadSmsCenter(response)) {
                 return;

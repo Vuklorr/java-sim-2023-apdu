@@ -10,7 +10,7 @@ public enum ApduResponse {
 
     //второй байт должен выводить длину значений в файле, но в данной реализации он выводит одно и то же значение,
     // так как оно не участвует в задании.
-    RESPONSE_SELECT_SUCCESS (new byte[] {(byte)0x9F, (byte)0x09}),
+    RESPONSE_SELECT_SUCCESS (new byte[] {(byte)0x9F, (byte)0x1C}),
 
     RESPONSE_CLA_ERROR (new byte[]{(byte)0x6E, (byte)0x00}),
 

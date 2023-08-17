@@ -15,15 +15,23 @@ import org.apdu.utils.SimUtils;
  */
 
 public class DefaultSimEmulatorImpl implements SimEmulator {
-    private final DefaultEfSmsP mySimSMSP;
+    private DefaultEfSmsP mySimSmsP;
 
-    private final DefaultEfImsi mySimIMSI;
+    private DefaultEfImsi mySimIMSI;
 
     @Getter
     private byte[] responseData;
 
-    public DefaultSimEmulatorImpl(DefaultEfSmsP mySimSMSP, DefaultEfImsi mySimIMSI) {
-        this.mySimSMSP = mySimSMSP;
+    public DefaultSimEmulatorImpl(DefaultEfSmsP mySimSmsP) {
+        this.mySimSmsP = mySimSmsP;
+    }
+
+    public DefaultSimEmulatorImpl(DefaultEfImsi mySimIMSI) {
+        this.mySimIMSI = mySimIMSI;
+    }
+
+    public DefaultSimEmulatorImpl(DefaultEfSmsP mySimSmsP, DefaultEfImsi mySimIMSI) {
+        this.mySimSmsP = mySimSmsP;
         this.mySimIMSI = mySimIMSI;
     }
 
@@ -48,7 +56,11 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
                     case (byte) 0x01 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            responseData = mySimSMSP.getDestinationAddress();
+                            if(apdu.getLenResponse() != mySimSmsP.getDestinationAddress().length) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = mySimSmsP.getDestinationAddress();
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
@@ -59,83 +71,135 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            responseData = new byte[]{mySimSMSP.getParameterIndicator()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getParameterIndicator()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
                     case (byte) 0x02 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            responseData = mySimSMSP.getServiceCentreAddress();
+                            if(apdu.getLenResponse() != mySimSmsP.getServiceCentreAddress().length) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = mySimSmsP.getServiceCentreAddress();
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            responseData = new byte[]{mySimSMSP.getParameterIndicator()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getParameterIndicator()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            responseData = mySimSMSP.getDestinationAddress();
+                            if(apdu.getLenResponse() != mySimSmsP.getDestinationAddress().length) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = mySimSmsP.getDestinationAddress();
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
                     case (byte) 0x03 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            responseData = new byte[]{mySimSMSP.getProtocolId()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getProtocolId()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            responseData = mySimSMSP.getDestinationAddress();
+                            if(apdu.getLenResponse() != mySimSmsP.getDestinationAddress().length) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = mySimSmsP.getDestinationAddress();
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            responseData = mySimSMSP.getServiceCentreAddress();
+                            if(apdu.getLenResponse() != mySimSmsP.getServiceCentreAddress().length) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = mySimSmsP.getServiceCentreAddress();
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
                     case (byte) 0x04 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            responseData = new byte[]{mySimSMSP.getDataCodingScheme()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getDataCodingScheme()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            responseData = mySimSMSP.getServiceCentreAddress();
+                            if(apdu.getLenResponse() != mySimSmsP.getServiceCentreAddress().length) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = mySimSmsP.getServiceCentreAddress();
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            responseData = new byte[]{mySimSMSP.getProtocolId()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getProtocolId()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
                     case (byte) 0x05 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            responseData = new byte[]{mySimSMSP.getValidPeriod()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getValidPeriod()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            responseData = new byte[]{mySimSMSP.getProtocolId()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getProtocolId()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            responseData = new byte[]{mySimSMSP.getDataCodingScheme()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getDataCodingScheme()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
@@ -147,13 +211,21 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            responseData = new byte[]{mySimSMSP.getDataCodingScheme()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getDataCodingScheme()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            responseData = new byte[]{mySimSMSP.getValidPeriod()};
+                            if(apdu.getLenResponse() != (byte)0x01) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            responseData = new byte[]{mySimSmsP.getValidPeriod()};
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
@@ -167,7 +239,7 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
                     case (byte) 0x01 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            mySimSMSP.setDestinationAddress(data);
+                            mySimSmsP.setDestinationAddress(data);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
@@ -178,83 +250,83 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            mySimSMSP.setParameterIndicator(data[0]);
+                            mySimSmsP.setParameterIndicator(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
                     case (byte) 0x02 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            mySimSMSP.setServiceCentreAddress(data);
+                            mySimSmsP.setServiceCentreAddress(data);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            mySimSMSP.setParameterIndicator(data[0]);
+                            mySimSmsP.setParameterIndicator(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            mySimSMSP.setDestinationAddress(data);
+                            mySimSmsP.setDestinationAddress(data);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
                     case (byte) 0x03 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            mySimSMSP.setProtocolId(data[0]);
+                            mySimSmsP.setProtocolId(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            mySimSMSP.setDestinationAddress(data);
+                            mySimSmsP.setDestinationAddress(data);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            mySimSMSP.setServiceCentreAddress(data);
+                            mySimSmsP.setServiceCentreAddress(data);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
                     case (byte) 0x04 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            mySimSMSP.setDataCodingScheme(data[0]);
+                            mySimSmsP.setDataCodingScheme(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            mySimSMSP.setServiceCentreAddress(data);
+                            mySimSmsP.setServiceCentreAddress(data);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            mySimSMSP.setProtocolId(data[0]);
+                            mySimSmsP.setProtocolId(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
                     case (byte) 0x05 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            mySimSMSP.setValidPeriod(data[0]);
+                            mySimSmsP.setValidPeriod(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            mySimSMSP.setProtocolId(data[0]);
+                            mySimSmsP.setProtocolId(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            mySimSMSP.setDataCodingScheme(data[0]);
+                            mySimSmsP.setDataCodingScheme(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
@@ -266,13 +338,13 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            mySimSMSP.setDataCodingScheme(data[0]);
+                            mySimSmsP.setDataCodingScheme(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            mySimSMSP.setValidPeriod(data[0]);
+                            mySimSmsP.setValidPeriod(data[0]);
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }

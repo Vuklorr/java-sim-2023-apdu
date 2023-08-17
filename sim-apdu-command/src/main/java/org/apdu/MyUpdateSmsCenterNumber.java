@@ -11,7 +11,7 @@ public class MyUpdateSmsCenterNumber {
     public static void main(String[] args) {
         //Подключение к карт ридеру по протоколу T=0
         //Взаимодействие с SIM картой
-        SimEmulator simEmulator = new DefaultSimEmulatorImpl(SimUtils.initSimSMSP(), SimUtils.initSimIMSI());
+        SimEmulator simEmulator = new DefaultSimEmulatorImpl(SimUtils.initSimSmsP(), SimUtils.initSimImsi());
         //массив байтов, для получения R-APDU
         byte[] responseApdu;
         DefaultApduCommand selectApdu = new DefaultApduCommand((byte)0xA0, (byte)0xA4, (byte)0x00, (byte)0x00,

@@ -13,7 +13,7 @@ public class SimUtils {
      * Инициализация sim карты lfyysvb
      * @return инициализированную sim smsp
      */
-    public static DefaultEfSmsP initSimSMSP() {
+    public static DefaultEfSmsP initSimSmsP() {
         byte parameterIndicator = (byte)0xE9;
         byte[] destinationAddress = new byte[] {(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
                 (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
@@ -28,7 +28,7 @@ public class SimUtils {
                 protocolId, dataCodingScheme, validPeriod);
     }
 
-    public static DefaultEfImsi initSimIMSI() {
+    public static DefaultEfImsi initSimImsi() {
         byte[] imsiDataBCD = new byte[] {(byte)0x06, (byte)0x21, (byte)0x43, (byte)0x65, (byte)0x87, (byte)0x09, (byte)0xF0,
                 (byte)0xFF, (byte)0xFF};
         return new DefaultEfImsi(imsiDataBCD);

@@ -86,7 +86,7 @@ public class UpdateSmsCenterNumber {
             // Закрываем соединение с картой
             card.disconnect(true);
         } catch (CardException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 }

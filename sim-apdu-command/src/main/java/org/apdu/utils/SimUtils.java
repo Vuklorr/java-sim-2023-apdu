@@ -156,6 +156,21 @@ public class SimUtils {
         return stringBuilder.toString();
     }
 
+    public static byte[] recordUpdate(byte[] data) {
+        byte[] res = new byte[12];
+        int j = 0;
+        for (byte b : data) {
+            res[j++] = b;
+        }
+
+        while (j < res.length) {
+            res[j++] = (byte)0xFF;
+        }
+
+        return res;
+    }
+
+
     /**
      * Метод, который обрабатывает смещение параметра 1 и параметра 2 в APDU команде READ.
      *
@@ -164,7 +179,6 @@ public class SimUtils {
      * @param simData - данные SIM карты (номер SMS центра)
      * @return - массив байтов с учетом смещения
      */
-    //FIXME смещение задается 2 параметрами 01 и 04 = 0104h -> 260
     public static byte[] offsetReadData(short offset, byte param3, byte[] simData) {
         byte[] res = new byte[param3];
         int j = 0;
@@ -184,7 +198,6 @@ public class SimUtils {
      * @param simData - данные SIM карты (номер SMS центра)
      * @return - массив байтов с учетом смещения
      */
-    //FIXME смотри выше
     public static byte[] offsetUpdateData(short offset, byte param3, byte[] apduData, byte[] simData) {
         int i = offset;
         int j = 0;

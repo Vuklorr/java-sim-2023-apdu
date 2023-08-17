@@ -56,7 +56,7 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
                     case (byte) 0x01 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            if(apdu.getLenResponse() != mySimSmsP.getDestinationAddress().length) {
+                            if(apdu.getLenResponse() > mySimSmsP.getDestinationAddress().length) {
                                 return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
                             }
 
@@ -82,7 +82,7 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
                     case (byte) 0x02 -> {
                         //следующая запись
                         if(apdu.getParam2() == 0x02) {
-                            if(apdu.getLenResponse() != mySimSmsP.getServiceCentreAddress().length) {
+                            if(apdu.getLenResponse() > mySimSmsP.getServiceCentreAddress().length) {
                                 return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
                             }
 
@@ -102,7 +102,7 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            if(apdu.getLenResponse() != mySimSmsP.getDestinationAddress().length) {
+                            if(apdu.getLenResponse() > mySimSmsP.getDestinationAddress().length) {
                                 return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
                             }
 
@@ -123,7 +123,7 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            if(apdu.getLenResponse() != mySimSmsP.getDestinationAddress().length) {
+                            if(apdu.getLenResponse() > mySimSmsP.getDestinationAddress().length) {
                                 return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
                             }
 
@@ -133,7 +133,7 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            if(apdu.getLenResponse() != mySimSmsP.getServiceCentreAddress().length) {
+                            if(apdu.getLenResponse() > mySimSmsP.getServiceCentreAddress().length) {
                                 return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
                             }
 
@@ -154,7 +154,7 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //предыдущая запись
                         if(apdu.getParam2() == 0x03) {
-                            if(apdu.getLenResponse() != mySimSmsP.getServiceCentreAddress().length) {
+                            if(apdu.getLenResponse() > mySimSmsP.getServiceCentreAddress().length) {
                                 return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
                             }
 
@@ -288,7 +288,16 @@ public class DefaultSimEmulatorImpl implements SimEmulator {
 
                         //текущая запись
                         if(apdu.getParam2() == 0x04) {
-                            mySimSmsP.setServiceCentreAddress(data);
+                            if(apdu.getLenData() > 0x0C) {
+                                return ApduResponse.RESPONSE_INCORRECT_PARAM_ERROR.getValue();
+                            }
+
+                            if(apdu.getLenData() == 0x0C) {
+                                mySimSmsP.setServiceCentreAddress(data);
+                            } else {
+                                mySimSmsP.setServiceCentreAddress(SimUtils.recordUpdate(data));
+                            }
+
                             return ApduResponse.RESPONSE_SUCCESS.getValue();
                         }
                     }
